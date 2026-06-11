@@ -28,8 +28,8 @@ Bun-style monorepo workspaces for Composer
   symlinked path repositories the moment Composer runs anywhere inside the
   monorepo.
 - **A workspace version tag.** Every workspace library resolves as
-  `dev-workspace`, so a member can declare `"acme/support": "dev-workspace"`
-  - a valid constraint that can only ever be satisfied locally, never by
+  `dev-workspace`, so a member can declare `"acme/support": "dev-workspace"` —
+  a valid constraint that can only ever be satisfied locally, never by
   Packagist.
 - **Fan-out commands.** Run scripts and Composer project-management commands
   across every member from the root: `composer ws run test`,
@@ -37,15 +37,17 @@ Bun-style monorepo workspaces for Composer
 
 ## Getting started
 
+Requires PHP 8.3+ and Composer 2.3+.
+
 Install globally so the plugin is active for every `composer install` run
 anywhere inside your monorepo (do the same in CI):
 
-```
+```bash
 composer global require midsonlajeanty/composer-workspace-plugin
 composer global config allow-plugins.midsonlajeanty/composer-workspace-plugin true
 ```
 
-Or require it in the monorepo root only fan-out commands then work from the
+Or require it in the monorepo root only — fan-out commands then work from the
 root, and member installs driven by `composer ws install` inherit it.
 
 ## Usage
@@ -80,7 +82,7 @@ export COMPOSER_WORKSPACE_ROOT=/var/monorepo
 
 ### Depending on workspace libraries
 
-Inside any member, just require the library - no `repositories` entry needed:
+Inside any member, just require the library — no `repositories` entry needed:
 
 ```json
 {
@@ -96,9 +98,9 @@ symlinked, so edits to a library are live in every consumer instantly.
 ### Fan-out commands
 
 Besides `list` and `run`, **any Composer command** is proxied to every member.
-Commands run in-process (no subprocess, no re-bootstrap, memory reclaimed
-after each member) and flags are forwarded verbatim - no `--` separator
-needed:
+Each member runs in its own isolated process — scripts, plugins, and
+autoloaders never leak between members — and flags are forwarded verbatim, no
+`--` separator needed:
 
 ```bash
 composer ws list                                  # members and their scripts
@@ -121,11 +123,11 @@ everything else reaches the proxied command untouched.
 
 ## Contributing
 
-You have a lot of options to contribute to this project ! You can :
+You have a lot of options to contribute to this project! You can:
 
-- [Fork](https://github.com/midsonlajeanty/composer-workspace-plugin) on Github
-- [Submit](https://github.com/midsonlajeanty/composer-workspace-plugin/issues) a bug report.
-- [Donate](https://paypal.me/midsonlajeanty) to the Developper
+- [Fork](https://github.com/midsonlajeanty/composer-workspace-plugin) it on GitHub
+- [Submit](https://github.com/midsonlajeanty/composer-workspace-plugin/issues) a bug report
+- [Donate](https://paypal.me/midsonlajeanty) to the developer
 
 ## License
 

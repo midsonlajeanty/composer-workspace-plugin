@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 1660px; height: 380px; background: transparent; }
+  body { font-family: "Ubuntu Sans", "Ubuntu", sans-serif; }
+
+  .banner {
+    position: relative;
+    width: 1660px;
+    height: 380px;
+    border-radius: 14px;
+    background: #060d26;
+    overflow: hidden;
+    border: 1px solid rgba(120, 150, 255, 0.14);
+  }
+
+  /* blueprint grid */
+  .banner::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(110, 140, 255, 0.055) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(110, 140, 255, 0.055) 1px, transparent 1px);
+    background-size: 46px 46px;
+    background-position: 23px 23px;
+  }
+
+  /* bicolor edge — the signature */
+  .edge {
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 10px;
+    background: linear-gradient(180deg, #2f6fed 0%, #2f6fed 50%, #e3243b 50%, #e3243b 100%);
+  }
+
+  .content {
+    position: absolute;
+    inset: 0;
+    padding: 44px 70px 40px 64px;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .left { display: flex; flex-direction: column; }
+
+  .lockup {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 26px;
+  }
+  .flagmark { display: flex; gap: 5px; }
+  .flagmark span { width: 9px; height: 22px; border-radius: 2px; }
+  .flagmark .b { background: #2f6fed; }
+  .flagmark .r { background: #e3243b; }
+  .vendor {
+    font-family: "JetBrainsMono Nerd Font Mono", monospace;
+    font-size: 22px;
+    letter-spacing: 4px;
+    color: #93a5d6;
+    text-transform: uppercase;
+  }
+
+  h1 {
+    font-size: 104px;
+    font-weight: 800;
+    line-height: 0.95;
+    letter-spacing: -2px;
+    color: #f2f5ff;
+    margin-bottom: 20px;
+  }
+  h1 .outline {
+    color: transparent;
+    -webkit-text-stroke: 2.5px #2f6fed;
+  }
+
+  .tagline {
+    font-size: 28px;
+    font-weight: 400;
+    color: #93a5d6;
+    margin-bottom: 34px;
+  }
+
+  .pill {
+    align-self: flex-start;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-family: "JetBrainsMono Nerd Font Mono", monospace;
+    font-size: 22px;
+    color: #d7defa;
+    background: rgba(47, 111, 237, 0.10);
+    border: 1px solid rgba(47, 111, 237, 0.40);
+    border-radius: 10px;
+    padding: 14px 24px;
+  }
+  .pill .dollar { color: #e3243b; font-weight: 700; }
+
+  .tree {
+    font-family: "JetBrainsMono Nerd Font Mono", monospace;
+    font-size: 22.5px;
+    line-height: 1.62;
+    color: #6e7fae;
+    align-self: center;
+    white-space: pre;
+  }
+  .tree .dir { color: #5f8dff; font-weight: 700; }
+  .tree .file { color: #aab8e3; }
+  .tree .link { color: #ff5d6e; }
+  .tree .dim { color: #46568a; }
+</style>
+</head>
+<body>
+  <div class="banner">
+    <div class="edge"></div>
+    <div class="content">
+      <div class="left">
+        <div class="lockup">
+          <div class="flagmark"><span class="b"></span><span class="r"></span></div>
+          <div class="vendor">midsonlajeanty</div>
+        </div>
+        <h1>work<span class="outline">space</span></h1>
+        <div class="tagline">Bun-style monorepo workspaces for Composer</div>
+        <div class="pill"><span class="dollar">$</span> composer require midsonlajeanty/composer-workspace-plugin</div>
+      </div>
+      <div class="tree"><span class="dir">monorepo/</span>
+<span class="dim">├─</span> <span class="file">composer.json</span>
+<span class="dim">├─</span> <span class="dir">packages/</span>
+<span class="dim">│  ├─</span> <span class="dir">api/</span> <span class="link">⇒ dev-workspace</span>
+<span class="dim">│  └─</span> <span class="dir">support/</span> <span class="link">⇒ dev-workspace</span>
+<span class="dim">└─</span> <span class="dir">services/</span>
+<span class="dim">   └─</span> <span class="dir">billing/</span></div>
+    </div>
+  </div>
+</body>
+</html>

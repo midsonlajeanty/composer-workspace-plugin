@@ -1,0 +1,9 @@
+includes:
+    - vendor/mrpunyapal/peststan/extension.neon
+
+parameters:
+    level: 10
+    parallel:
+        maximumNumberOfProcesses: 1
+    paths:
+        - src

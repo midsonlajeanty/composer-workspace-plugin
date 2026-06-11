@@ -1,0 +1,63 @@
+name: Release
+
+on:
+    push:
+        tags:
+            - "v[0-9]+.[0-9]+.[0-9]+"
+            - "[0-9]+.[0-9]+.[0-9]+"
+            - "v[0-9]+.[0-9]+.[0-9]+-*"
+            - "[0-9]+.[0-9]+.[0-9]+-*"
+
+permissions:
+    contents: write
+
+jobs:
+    release:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+
+            - name: Setup PHP
+              uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # 2.37.2
+              with:
+                  php-version: "8.3"
+                  coverage: none
+
+            - name: Install dependencies
+              run: composer install --prefer-dist --no-progress --no-interaction
+
+            - name: Run tests
+              run: composer test
+
+            - name: Create GitHub release
+              env:
+                  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              run: |
+                  version="${GITHUB_REF_NAME#v}"
+                  constraint="^${version}"
+                  flags=(--generate-notes)
+
+                  if [[ "$GITHUB_REF_NAME" == *-* ]]; then
+                      flags+=(--prerelease)
+                      constraint="${version}"
+                  fi
+
+                  cat > "$RUNNER_TEMP/release-body.md" <<EOF
+                  **Bun-style monorepo workspaces for Composer** — auto-registered path repositories and fan-out commands across every member.
+
+                  ## Installation
+
+                  \`\`\`bash
+                  composer global require midsonlajeanty/composer-workspace-plugin:"${constraint}"
+                  composer global config allow-plugins.midsonlajeanty/composer-workspace-plugin true
+                  \`\`\`
+
+                  See the [README](https://github.com/midsonlajeanty/composer-workspace-plugin#readme) for workspace setup and fan-out commands.
+                  EOF
+
+                  gh release create "$GITHUB_REF_NAME" \
+                      --title "$GITHUB_REF_NAME" \
+                      --notes-file "$RUNNER_TEMP/release-body.md" \
+                      "${flags[@]}"

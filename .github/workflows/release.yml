@@ -38,8 +38,10 @@ jobs:
                   myToken: ${{ secrets.GITHUB_TOKEN }}
 
             - name: Update CHANGELOG.md
+              env:
+                  NOTES: ${{ steps.changelog.outputs.changelog }}
               run: |
-                  NOTES="${{ steps.changelog.outputs.changelog }}"
+                  # Use environment variable to avoid shell injection
                   VERSION="${GITHUB_REF_NAME}"
                   DATE=$(date +%Y-%m-%d)
 
@@ -55,13 +57,17 @@ jobs:
                   TEMP_FILE=$(mktemp)
                   echo "## [$VERSION] - $DATE" > "$TEMP_FILE"
                   echo "" >> "$TEMP_FILE"
-                  echo "$NOTES" >> "$TEMP_FILE"
+                  # Use printf or heredoc to safely handle the environment variable
+                  printf "%s\n" "$NOTES" >> "$TEMP_FILE"
                   echo "" >> "$TEMP_FILE"
 
                   if grep -q "## \\[Unreleased\\]" CHANGELOG.md; then
-                      sed -i "/## \\[Unreleased\\]/a \\\\" CHANGELOG.md
+                      # Insert after Unreleased
                       sed -i "/## \\[Unreleased\\]/r $TEMP_FILE" CHANGELOG.md
+                      # Add a newline if needed
+                      sed -i "/## \\[Unreleased\\]/a \\\\" CHANGELOG.md
                   else
+                      # Insert after header
                       sed -i "4r $TEMP_FILE" CHANGELOG.md
                   fi
 

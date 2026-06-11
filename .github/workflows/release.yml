@@ -18,6 +18,8 @@ jobs:
         steps:
             - name: Checkout
               uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+              with:
+                  fetch-depth: 0
 
             - name: Setup PHP
               uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # 2.37.2
@@ -31,11 +33,26 @@ jobs:
             - name: Run tests
               run: composer test
 
+            - name: Resolve changelog range
+              id: range
+              run: |
+                  # Find the previous tag; fall back to the first commit on the
+                  # very first release (no prior tag / no GitHub release exists yet).
+                  CURRENT_TAG="${GITHUB_REF_NAME}"
+                  BASE_REF=$(git describe --tags --abbrev=0 "${CURRENT_TAG}^" 2>/dev/null || true)
+                  if [ -z "$BASE_REF" ]; then
+                      BASE_REF=$(git rev-list --max-parents=0 HEAD | tail -n 1)
+                  fi
+                  echo "base=$BASE_REF" >> "$GITHUB_OUTPUT"
+                  echo "head=$CURRENT_TAG" >> "$GITHUB_OUTPUT"
+
             - name: Generate Changelog
               id: changelog
               uses: metcalfc/changelog-generator@0440d0932f9a0dd1cc9ecd8412830761351323bd # v4.7.0
               with:
                   myToken: ${{ secrets.GITHUB_TOKEN }}
+                  base-ref: ${{ steps.range.outputs.base }}
+                  head-ref: ${{ steps.range.outputs.head }}
 
             - name: Update CHANGELOG.md
               env:

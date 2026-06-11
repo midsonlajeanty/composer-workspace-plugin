@@ -17,7 +17,7 @@ jobs:
 
         steps:
             - name: Checkout
-              uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+              uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
 
             - name: Setup PHP
               uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # 2.37.2
@@ -30,6 +30,53 @@ jobs:
 
             - name: Run tests
               run: composer test
+
+            - name: Generate Changelog
+              id: changelog
+              uses: metcalfc/changelog-generator@d552ecf3366cf9d6da9fd7dbe425325d3d095aa8 # v4.3.1
+              with:
+                  myToken: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: Update CHANGELOG.md
+              env:
+                  NOTES: ${{ steps.changelog.outputs.changelog }}
+              run: |
+                  # Use environment variable to avoid shell injection
+                  VERSION="${GITHUB_REF_NAME}"
+                  DATE=$(date +%Y-%m-%d)
+
+                  if [ ! -f CHANGELOG.md ]; then
+                    echo "# Changelog" > CHANGELOG.md
+                    echo "" >> CHANGELOG.md
+                    echo "All notable changes to this project will be documented in this file." >> CHANGELOG.md
+                    echo "" >> CHANGELOG.md
+                    echo "## [Unreleased]" >> CHANGELOG.md
+                    echo "" >> CHANGELOG.md
+                  fi
+
+                  TEMP_FILE=$(mktemp)
+                  echo "## [$VERSION] - $DATE" > "$TEMP_FILE"
+                  echo "" >> "$TEMP_FILE"
+                  # Use printf or heredoc to safely handle the environment variable
+                  printf "%s\n" "$NOTES" >> "$TEMP_FILE"
+                  echo "" >> "$TEMP_FILE"
+
+                  if grep -q "## \\[Unreleased\\]" CHANGELOG.md; then
+                      # Insert after Unreleased
+                      sed -i "/## \\[Unreleased\\]/r $TEMP_FILE" CHANGELOG.md
+                      # Add a newline if needed
+                      sed -i "/## \\[Unreleased\\]/a \\\\" CHANGELOG.md
+                  else
+                      # Insert after header
+                      sed -i "4r $TEMP_FILE" CHANGELOG.md
+                  fi
+
+            - name: Commit CHANGELOG.md
+              uses: stefanzweifel/git-auto-commit-action@b863ae1933cb653a53c021fe36dbb774e1fb9403 # v5.2.0
+              with:
+                  commit_message: "docs: update CHANGELOG.md for ${{ github.ref_name }}"
+                  file_pattern: 'CHANGELOG.md'
+                  branch: main
 
             - name: Create GitHub release
               env:

@@ -45,7 +45,7 @@ composer global require midsonlajeanty/composer-workspace-plugin
 composer global config allow-plugins.midsonlajeanty/composer-workspace-plugin true
 ```
 
-Or require it in the monorepo root only - fan-out commands then work from the
+Or require it in the monorepo root only fan-out commands then work from the
 root, and member installs driven by `composer ws install` inherit it.
 
 ## Usage

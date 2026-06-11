@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [v1.0.1] - 2026-06-11
+
+- [f7cfbb1](http://github.com/midsonlajeanty/composer-workspace-plugin/commit/f7cfbb1a2721d48e1811c74cd78c10ba8f165b88) - fix: release.yml
+
+
+
 ## [1.0.0-dev] - 2026-06-11
 
 ### Added

@@ -9,7 +9,7 @@ use Mds\Workspace\WorkspaceMember;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
- * `composer ws run <script>` — run a Composer script in every member that
+ * `composer ws run <script>` - run a Composer script in every member that
  * declares it, by proxying `run-script` per member.
  */
 final readonly class RunScriptHandler implements CommandHandler

@@ -72,7 +72,7 @@ it('fans a command out to every member and reports success', function (): void {
 
     expect($exit)->toBe(0);
     expect($ran)->toBe([[['update'], 'acme/a'], [['update'], 'acme/b']]);
-    expect($output->fetch())->toContain('Summary — composer update');
+    expect($output->fetch())->toContain('Summary - composer update');
 });
 
 it('stops at the first failure unless continue-on-error is set', function (): void {

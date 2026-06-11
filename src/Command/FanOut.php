@@ -40,7 +40,7 @@ final readonly class FanOut
         foreach ($members as $member) {
             $output->writeln(
                 sprintf(
-                    "\n<info>▸ %s</info> <comment>(%s)</comment> — composer %s",
+                    "\n<info>▸ %s</info> <comment>(%s)</comment> - composer %s",
                     $member->name,
                     $member->relativePath,
                     $label,
@@ -87,7 +87,7 @@ final readonly class FanOut
         OutputInterface $output,
     ): void {
         $output->writeln(
-            sprintf("\n<info>Summary — composer %s</info>", $label),
+            sprintf("\n<info>Summary - composer %s</info>", $label),
         );
 
         foreach ($results as $name => $result) {

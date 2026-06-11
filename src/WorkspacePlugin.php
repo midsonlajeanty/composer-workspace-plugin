@@ -25,7 +25,7 @@ final class WorkspacePlugin implements Capable, PluginInterface
     /**
      * Version every workspace library is published under by the auto-registered
      * path repositories. Members can require it explicitly ("acme/support":
-     * "dev-workspace") or keep a plain "@dev" constraint — both resolve here.
+     * "dev-workspace") or keep a plain "@dev" constraint - both resolve here.
      */
     public const string WORKSPACE_VERSION = 'dev-workspace';
 

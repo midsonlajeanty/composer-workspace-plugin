@@ -35,7 +35,7 @@ final class WorkspaceCommand extends BaseCommand
     protected function configure(): void
     {
         // Unknown options belong to the proxied command and are forwarded
-        // verbatim — `composer ws update --with-all-dependencies` just works.
+        // verbatim - `composer ws update --with-all-dependencies` just works.
         $this->ignoreValidationErrors();
 
         $this->setName('workspace')
@@ -51,7 +51,7 @@ final class WorkspaceCommand extends BaseCommand
             ->addArgument(
                 'args',
                 InputArgument::OPTIONAL | InputArgument::IS_ARRAY,
-                "Script name (with 'run'), package names, or extra flags — forwarded verbatim",
+                "Script name (with 'run'), package names, or extra flags - forwarded verbatim",
             )
             ->addOption(
                 'filter',
@@ -109,7 +109,7 @@ final class WorkspaceCommand extends BaseCommand
 
         if ($rawAction === '') {
             $output->writeln(
-                '<error>Missing action. Usage: composer ws <action> — e.g. composer ws run test</error>',
+                '<error>Missing action. Usage: composer ws <action> - e.g. composer ws run test</error>',
             );
 
             return self::FAILURE;
@@ -147,7 +147,7 @@ final class WorkspaceCommand extends BaseCommand
      * Run Composer in a subprocess per member. In-process proxying is not
      * viable for a fan-out: PHP scripts triggered by members (e.g. Laravel's
      * postAutoloadDump) require_once their vendor/autoload.php into the
-     * running process, and PHP can never unload a class — the next member
+     * running process, and PHP can never unload a class - the next member
      * declaring the same autoloader class name fatals with "Cannot redeclare"
      * (GlobalCommand only gets away with in-process proxying because it
      * proxies exactly once per process). A subprocess gives every member a
@@ -185,7 +185,7 @@ final class WorkspaceCommand extends BaseCommand
     }
 
     /**
-     * Everything the user typed after the action — unknown flags included —
+     * Everything the user typed after the action - unknown flags included -
      * minus this command's own options.
      *
      * @return list<string>

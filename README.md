@@ -1,7 +1,7 @@
 <p align="center">
     <picture>
         <source media="(prefers-color-scheme: dark)" srcset="art/header-dark.png">
-        <img src="art/header-light.png" width="830" alt="Composer Workspace Plugin — Bun-style monorepo workspaces for Composer">
+        <img src="art/header-light.png" width="830" alt="Composer Workspace Plugin - Bun-style monorepo workspaces for Composer">
     </picture>
 </p>
 
@@ -29,7 +29,7 @@ Bun-style monorepo workspaces for Composer
   monorepo.
 - **A workspace version tag.** Every workspace library resolves as
   `dev-workspace`, so a member can declare `"acme/support": "dev-workspace"`
-  — a valid constraint that can only ever be satisfied locally, never by
+  - a valid constraint that can only ever be satisfied locally, never by
   Packagist.
 - **Fan-out commands.** Run scripts and Composer project-management commands
   across every member from the root: `composer ws run test`,
@@ -45,7 +45,7 @@ composer global require midsonlajeanty/composer-workspace-plugin
 composer global config allow-plugins.midsonlajeanty/composer-workspace-plugin true
 ```
 
-Or require it in the monorepo root only — fan-out commands then work from the
+Or require it in the monorepo root only - fan-out commands then work from the
 root, and member installs driven by `composer ws install` inherit it.
 
 ## Usage
@@ -80,7 +80,7 @@ export COMPOSER_WORKSPACE_ROOT=/var/monorepo
 
 ### Depending on workspace libraries
 
-Inside any member, just require the library — no `repositories` entry needed:
+Inside any member, just require the library - no `repositories` entry needed:
 
 ```json
 {
@@ -97,7 +97,7 @@ symlinked, so edits to a library are live in every consumer instantly.
 
 Besides `list` and `run`, **any Composer command** is proxied to every member.
 Commands run in-process (no subprocess, no re-bootstrap, memory reclaimed
-after each member) and flags are forwarded verbatim — no `--` separator
+after each member) and flags are forwarded verbatim - no `--` separator
 needed:
 
 ```bash

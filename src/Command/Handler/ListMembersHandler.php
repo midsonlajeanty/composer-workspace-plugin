@@ -8,7 +8,7 @@ use Mds\Workspace\WorkspaceMember;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
- * `composer ws list` — show every workspace member and its scripts.
+ * `composer ws list` - show every workspace member and its scripts.
  */
 final readonly class ListMembersHandler implements CommandHandler
 {

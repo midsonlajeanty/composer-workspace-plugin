@@ -45,7 +45,7 @@ jobs:
                   fi
 
                   cat > "$RUNNER_TEMP/release-body.md" <<EOF
-                  **Bun-style monorepo workspaces for Composer** — auto-registered path repositories and fan-out commands across every member.
+                  **Bun-style monorepo workspaces for Composer** - auto-registered path repositories and fan-out commands across every member.
 
                   ## Installation
 

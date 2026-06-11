@@ -9,7 +9,7 @@ use Mds\Workspace\WorkspaceMember;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
- * Any other action — `composer ws update`, `ws require`, `ws audit`, … —
+ * Any other action - `composer ws update`, `ws require`, `ws audit`, … -
  * is proxied verbatim to Composer in every member, flags included.
  */
 final readonly class ProxyHandler implements CommandHandler

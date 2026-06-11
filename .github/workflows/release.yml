@@ -31,6 +31,47 @@ jobs:
             - name: Run tests
               run: composer test
 
+            - name: Generate Changelog
+              id: changelog
+              uses: metcalfc/changelog-generator@v4.3.1
+              with:
+                  myToken: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: Update CHANGELOG.md
+              run: |
+                  NOTES="${{ steps.changelog.outputs.changelog }}"
+                  VERSION="${GITHUB_REF_NAME}"
+                  DATE=$(date +%Y-%m-%d)
+
+                  if [ ! -f CHANGELOG.md ]; then
+                    echo "# Changelog" > CHANGELOG.md
+                    echo "" >> CHANGELOG.md
+                    echo "All notable changes to this project will be documented in this file." >> CHANGELOG.md
+                    echo "" >> CHANGELOG.md
+                    echo "## [Unreleased]" >> CHANGELOG.md
+                    echo "" >> CHANGELOG.md
+                  fi
+
+                  TEMP_FILE=$(mktemp)
+                  echo "## [$VERSION] - $DATE" > "$TEMP_FILE"
+                  echo "" >> "$TEMP_FILE"
+                  echo "$NOTES" >> "$TEMP_FILE"
+                  echo "" >> "$TEMP_FILE"
+
+                  if grep -q "## \\[Unreleased\\]" CHANGELOG.md; then
+                      sed -i "/## \\[Unreleased\\]/a \\\\" CHANGELOG.md
+                      sed -i "/## \\[Unreleased\\]/r $TEMP_FILE" CHANGELOG.md
+                  else
+                      sed -i "4r $TEMP_FILE" CHANGELOG.md
+                  fi
+
+            - name: Commit CHANGELOG.md
+              uses: stefanzweifel/git-auto-commit-action@v5
+              with:
+                  commit_message: "docs: update CHANGELOG.md for ${{ github.ref_name }}"
+                  file_pattern: 'CHANGELOG.md'
+                  branch: main
+
             - name: Create GitHub release
               env:
                   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

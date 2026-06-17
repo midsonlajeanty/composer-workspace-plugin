@@ -8,6 +8,7 @@ final readonly class WorkspaceMember
 {
     /**
      * @param  list<string>  $scripts  Script names declared in the member's composer.json
+     * @param  list<string>  $dependencies  Names of other workspace members this member requires
      */
     public function __construct(
         public string $name,
@@ -15,6 +16,7 @@ final readonly class WorkspaceMember
         public string $relativePath,
         public string $type,
         public array $scripts,
+        public array $dependencies = [],
     ) {}
 
     public function hasScript(string $script): bool

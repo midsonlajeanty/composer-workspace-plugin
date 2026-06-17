@@ -143,3 +143,114 @@ it('returns the workspace command from the provider', function (): void {
     expect($commands)->toHaveCount(1);
     expect($commands[0])->toBeInstanceOf(WorkspaceCommand::class);
 });
+
+it('resolves internal dependencies from require and require-dev', function (): void {
+    $root = workspace_test_directory();
+    $packages = $root.'/packages';
+
+    mkdir($packages.'/app', 0777, true);
+    mkdir($packages.'/library', 0777, true);
+    mkdir($packages.'/testing', 0777, true);
+
+    workspace_test_write_json($root.'/composer.json', [
+        'extra' => ['packages' => ['./packages']],
+    ]);
+
+    workspace_test_write_json($packages.'/app/composer.json', [
+        'name' => 'acme/app',
+        'type' => 'project',
+        'require' => [
+            'acme/library' => 'dev-workspace',
+            'monolog/monolog' => '^3.0',
+        ],
+        'require-dev' => [
+            'acme/testing' => 'dev-workspace',
+        ],
+    ]);
+
+    workspace_test_write_json($packages.'/library/composer.json', [
+        'name' => 'acme/library',
+    ]);
+
+    workspace_test_write_json($packages.'/testing/composer.json', [
+        'name' => 'acme/testing',
+    ]);
+
+    $members = WorkspaceMemberLocator::Locate($root, ['./packages']);
+
+    $byName = [];
+    foreach ($members as $member) {
+        $byName[$member->name] = $member;
+    }
+
+    expect($byName['acme/app']->dependencies)->toBe(['acme/library', 'acme/testing']);
+    expect($byName['acme/library']->dependencies)->toBe([]);
+    expect($byName['acme/testing']->dependencies)->toBe([]);
+});
+
+it('dedupes internal dependencies and keeps require before require-dev', function (): void {
+    $root = workspace_test_directory();
+    $packages = $root.'/packages';
+
+    mkdir($packages.'/app', 0777, true);
+    mkdir($packages.'/library', 0777, true);
+    mkdir($packages.'/testing', 0777, true);
+
+    workspace_test_write_json($root.'/composer.json', [
+        'extra' => ['packages' => ['./packages']],
+    ]);
+
+    // acme/library appears in BOTH require and require-dev → must dedupe to a
+    // single entry; acme/testing is require-dev only → must come after the
+    // require-sourced one.
+    workspace_test_write_json($packages.'/app/composer.json', [
+        'name' => 'acme/app',
+        'type' => 'project',
+        'require' => [
+            'acme/library' => 'dev-workspace',
+        ],
+        'require-dev' => [
+            'acme/library' => 'dev-workspace',
+            'acme/testing' => 'dev-workspace',
+        ],
+    ]);
+
+    workspace_test_write_json($packages.'/library/composer.json', [
+        'name' => 'acme/library',
+    ]);
+
+    workspace_test_write_json($packages.'/testing/composer.json', [
+        'name' => 'acme/testing',
+    ]);
+
+    $members = WorkspaceMemberLocator::Locate($root, ['./packages']);
+
+    $byName = [];
+    foreach ($members as $member) {
+        $byName[$member->name] = $member;
+    }
+
+    expect($byName['acme/app']->dependencies)->toBe(['acme/library', 'acme/testing']);
+});
+
+it('exposes its internal dependencies and defaults them to empty', function (): void {
+    $withDeps = new WorkspaceMember(
+        name: 'acme/app',
+        path: '/tmp/app',
+        relativePath: 'packages/app',
+        type: 'project',
+        scripts: [],
+        dependencies: ['acme/library'],
+    );
+
+    $withoutDeps = new WorkspaceMember(
+        name: 'acme/library',
+        path: '/tmp/library',
+        relativePath: 'packages/library',
+        type: 'library',
+        scripts: [],
+    );
+
+    expect($withDeps->dependencies)->toBe(['acme/library']);
+    expect($withoutDeps->dependencies)->toBe([]);
+});

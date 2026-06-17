@@ -34,6 +34,10 @@ Bun-style monorepo workspaces for Composer
 - **Fan-out commands.** Run scripts and Composer project-management commands
   across every member from the root: `composer ws run test`,
   `composer ws update`, `composer ws require`, …
+- **Dependency-aware ordering.** Proxied Composer commands (`install`,
+  `update`, `require`, …) run members in topological order — internal
+  libraries before the members that depend on them. A dependency cycle
+  between members aborts the command with an explicit error.
 
 ## Getting started
 

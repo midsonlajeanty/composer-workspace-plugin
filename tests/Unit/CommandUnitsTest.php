@@ -10,7 +10,7 @@ use Mds\Workspace\Command\Handler\RunScriptHandler;
 use Mds\Workspace\WorkspaceMember;
 use Symfony\Component\Console\Output\BufferedOutput;
 
-function workspace_test_member(string $name, array $scripts = []): WorkspaceMember
+function workspace_test_member(string $name, array $scripts = [], array $dependencies = []): WorkspaceMember
 {
     return new WorkspaceMember(
         name: $name,
@@ -18,6 +18,7 @@ function workspace_test_member(string $name, array $scripts = []): WorkspaceMemb
         relativePath: 'packages/'.$name,
         type: 'library',
         scripts: $scripts,
+        dependencies: $dependencies,
     );
 }
 
@@ -146,6 +147,44 @@ it('reports when there are no members to proxy to', function (): void {
 
     expect($handler->handle($output))->toBe(0);
     expect($output->fetch())->toContain('No workspace members found');
+});
+
+it('proxies members in topological order, dependencies first', function (): void {
+    $ran = [];
+    $fanOut = new FanOut(static function (array $command, WorkspaceMember $member) use (&$ran): int {
+        $ran[] = $member->name;
+
+        return 0;
+    }, false);
+
+    // app depends on library; passed app-first (alphabetical) → expect library first
+    $members = [
+        workspace_test_member('acme/app', [], ['acme/library']),
+        workspace_test_member('acme/library'),
+    ];
+
+    expect((new ProxyHandler('update', $members, [], $fanOut))->handle(new BufferedOutput))->toBe(0);
+    expect($ran)->toBe(['acme/library', 'acme/app']);
+});
+
+it('fails without running any member when the dependency graph has a cycle', function (): void {
+    $ran = [];
+    $fanOut = new FanOut(static function (array $command, WorkspaceMember $member) use (&$ran): int {
+        $ran[] = $member->name;
+
+        return 0;
+    }, false);
+
+    $members = [
+        workspace_test_member('acme/a', [], ['acme/b']),
+        workspace_test_member('acme/b', [], ['acme/a']),
+    ];
+
+    $output = new BufferedOutput;
+
+    expect((new ProxyHandler('update', $members, [], $fanOut))->handle($output))->toBe(1);
+    expect($ran)->toBe([]);
+    expect($output->fetch())->toContain('Cyclic workspace dependency detected');
 });
 
 it('lists members with their scripts', function (): void {

@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [v1.0.2] - 2026-06-17
+
+- [6bcfb65](http://github.com/midsonlajeanty/composer-workspace-plugin/commit/6bcfb6512c9084bb7625dd86c9a4e0075ac8b570) - fix: conflicts
+- [12b6eb6](http://github.com/midsonlajeanty/composer-workspace-plugin/commit/12b6eb6b033b81c9bfae6e7e0b26a06f0194b1f5) - feat: topological ordering of workspace members for proxied commands
+- [719876d](http://github.com/midsonlajeanty/composer-workspace-plugin/commit/719876d4ab2d93cba25a95a14b1a8ea579363813) - docs: update CHANGELOG.md for v1.0.1
+
+
+
 ## [v1.0.1] - 2026-06-11
 
 - [f7cfbb1](http://github.com/midsonlajeanty/composer-workspace-plugin/commit/f7cfbb1a2721d48e1811c74cd78c10ba8f165b88) - fix: release.yml

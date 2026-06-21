@@ -17,7 +17,9 @@ final class WorkspaceMemberLocator
     public static function Locate(string $rootDir, array $globs): array
     {
         $rootDir = rtrim($rootDir, '/');
-        $members = [];
+
+        /** @var array<string, array{member: array{name: string, path: string, type: string, scripts: list<string>}, requires: list<string>}> $collected */
+        $collected = [];
 
         foreach ($globs as $glob) {
             $normalized = self::Normalize($rootDir, $glob);
@@ -25,7 +27,7 @@ final class WorkspaceMemberLocator
             foreach (glob($normalized.'/*/composer.json') ?: [] as $manifest) {
                 $path = dirname($manifest);
 
-                if (isset($members[$path])) {
+                if (isset($collected[$path])) {
                     continue;
                 }
 
@@ -39,19 +41,74 @@ final class WorkspaceMemberLocator
                 $type = isset($data['type']) && is_string($data['type']) ? $data['type'] : 'library';
                 $scripts = isset($data['scripts']) && is_array($data['scripts']) ? array_keys($data['scripts']) : [];
 
-                $members[$path] = new WorkspaceMember(
-                    name: $name,
-                    path: $path,
-                    relativePath: self::Relative($rootDir, $path),
-                    type: $type,
-                    scripts: array_map(strval(...), $scripts),
-                );
+                $collected[$path] = [
+                    'member' => [
+                        'name' => $name,
+                        'path' => $path,
+                        'type' => $type,
+                        'scripts' => array_map(strval(...), $scripts),
+                    ],
+                    'requires' => self::RequireKeys($data),
+                ];
             }
         }
 
-        ksort($members);
+        ksort($collected);
 
-        return array_values($members);
+        $names = [];
+        foreach ($collected as $entry) {
+            $names[$entry['member']['name']] = true;
+        }
+
+        $members = [];
+        foreach ($collected as $path => $entry) {
+            $dependencies = [];
+            foreach ($entry['requires'] as $require) {
+                if (isset($names[$require]) && $require !== $entry['member']['name']) {
+                    $dependencies[] = $require;
+                }
+            }
+
+            $members[] = new WorkspaceMember(
+                name: $entry['member']['name'],
+                path: $entry['member']['path'],
+                relativePath: self::Relative($rootDir, $path),
+                type: $entry['member']['type'],
+                scripts: $entry['member']['scripts'],
+                dependencies: $dependencies,
+            );
+        }
+
+        return $members;
+    }
+
+    /**
+     * Merge the package names from `require` and `require-dev`, preserving the
+     * order they appear (require first, then require-dev) and dropping
+     * duplicates.
+     *
+     * @param  array<array-key, mixed>  $data
+     * @return list<string>
+     */
+    private static function RequireKeys(array $data): array
+    {
+        $keys = [];
+
+        foreach (['require', 'require-dev'] as $section) {
+            if (! isset($data[$section])) {
+                continue;
+            }
+            if (! is_array($data[$section])) {
+                continue;
+            }
+            foreach (array_keys($data[$section]) as $package) {
+                if (is_string($package) && ! in_array($package, $keys, true)) {
+                    $keys[] = $package;
+                }
+            }
+        }
+
+        return $keys;
     }
 
     private static function Normalize(string $rootDir, string $glob): string

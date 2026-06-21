@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace Mds\Workspace\Command\Handler;
 
 use Mds\Workspace\Command\FanOut;
+use Mds\Workspace\CyclicDependencyException;
 use Mds\Workspace\WorkspaceMember;
+use Mds\Workspace\WorkspaceMemberSorter;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
@@ -35,9 +37,17 @@ final readonly class ProxyHandler implements CommandHandler
             return 0;
         }
 
+        try {
+            $ordered = WorkspaceMemberSorter::Sort($this->members);
+        } catch (CyclicDependencyException $exception) {
+            $output->writeln(sprintf('<error>%s</error>', $exception->getMessage()));
+
+            return 1;
+        }
+
         return $this->fanOut->execute(
             [$this->action, ...$this->forwarded, '--no-interaction'],
-            $this->members,
+            $ordered,
             trim($this->action.' '.implode(' ', $this->forwarded)),
             $output,
         );

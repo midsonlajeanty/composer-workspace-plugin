@@ -30,7 +30,7 @@ Run a single test: `vendor/bin/pest --filter="<description>"`.
 
 ## Conventions
 
-- PHP `^8.3`, `composer-plugin-api ^2.3`. No runtime deps beyond those.
+- PHP `^8.4`, `composer-plugin-api ^2.3`. No runtime deps beyond those.
 - `declare(strict_types=1)`, `final` classes, typed class constants
   (`public const string X = ...`). Static factory-style method casing is used in
   places (`Locate`, `Sort`).

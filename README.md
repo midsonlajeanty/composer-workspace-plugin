@@ -43,7 +43,7 @@ right order. This plugin removes both chores:
 
 ## Install
 
-Requires PHP 8.3+ and Composer 2.3+.
+Requires PHP 8.4+ and Composer 2.3+.
 
 ```bash
 composer global require midsonlajeanty/composer-workspace-plugin

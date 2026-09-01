@@ -22,7 +22,7 @@
         "source": "https://github.com/midsonlajeanty/composer-workspace-plugin"
     },
     "require": {
-        "php": "^8.3",
+        "php": "^8.4",
         "composer-plugin-api": "^2.3"
     },
     "require-dev": {

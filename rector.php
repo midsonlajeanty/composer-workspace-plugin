@@ -11,4 +11,4 @@ return RectorConfig::configure()
     ])
     ->withRootFiles()
     ->withImportNames(removeUnusedImports: true)
-    ->withPhpSets(php85: true);
+    ->withPhpSets();

@@ -28,8 +28,10 @@
     "require-dev": {
         "composer/composer": "^2.8",
         "laravel/pint": "^1.30",
-        "pestphp/pest": "^5.0",
+        "pestphp/pest": "^5.1",
         "pestphp/pest-plugin-phpstan": "^5.2",
+        "pestphp/pest-plugin-rector": "^5.0",
+        "pestphp/pest-plugin-type-coverage": "^5.0",
         "phpstan/phpstan": "^2.2",
         "rector/rector": "^2.6"
     },
@@ -53,10 +55,7 @@
         }
     },
     "extra": {
-        "class": "Mds\\Workspace\\WorkspacePlugin",
-        "branch-alias": {
-            "dev-main": "1.x-dev"
-        }
+        "class": "Mds\\Workspace\\WorkspacePlugin"
     },
     "config": {
         "sort-packages": true,

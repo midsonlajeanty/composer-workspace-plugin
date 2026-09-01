@@ -14,16 +14,7 @@ use Symfony\Component\Console\Output\BufferedOutput;
  */
 final class FanOutFakeRun implements MemberRun
 {
-    private int $ticks;
-
-    public function __construct(
-        int $ticks,
-        private readonly int $exitCode,
-        private readonly string $output,
-        private readonly Closure $onFinish,
-    ) {
-        $this->ticks = $ticks;
-    }
+    public function __construct(private int $ticks, private readonly int $exitCode, private readonly string $output, private readonly Closure $onFinish) {}
 
     public function finished(): bool
     {

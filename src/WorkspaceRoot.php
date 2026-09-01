@@ -85,13 +85,7 @@ final readonly class WorkspaceRoot
             return false;
         }
 
-        foreach (self::REMOVED_KEYS as $key) {
-            if (isset($extra[$key]) && is_array($extra[$key])) {
-                return true;
-            }
-        }
-
-        return false;
+        return array_any(self::REMOVED_KEYS, fn ($key) => isset($extra[$key]) && is_array($extra[$key]));
     }
 
     private static function fromDir(string $dir): ?self

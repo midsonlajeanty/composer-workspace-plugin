@@ -15,6 +15,7 @@ use Mds\Workspace\WorkspaceConfig;
 use Mds\Workspace\WorkspaceMember;
 use Mds\Workspace\WorkspaceMemberLocator;
 use Mds\Workspace\WorkspaceRoot;
+use Override;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -98,7 +99,7 @@ final class WorkspaceCommand extends BaseCommand
      * Like GlobalCommand: the real work happens in the per-member subprocesses,
      * so the application skips its own startup checks.
      */
-    #[\Override]
+    #[Override]
     public function isProxyCommand(): bool
     {
         return true;

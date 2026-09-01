@@ -28,12 +28,23 @@ composer refactor      # Rector auto-fix           (rector)
 
 Run a single test: `vendor/bin/pest --filter="<description>"`.
 
+`pest-plugin-type-coverage` and `pest-plugin-rector` are installed but not wired
+into any script yet - `pest --type-coverage` and `pest --rector` run them.
+
 ## Conventions
 
+- **Pre-1.0.** The package is on `0.x`, so a minor release may break behaviour
+  and no deprecation cycle is owed. Say so in the changelog; do not invent
+  compatibility shims.
 - PHP `^8.4`, `composer-plugin-api ^2.3`. No runtime deps beyond those.
+- **`rector.php` must call `withPhpSets()` with no arguments** so Rector follows
+  `require.php` from composer.json. Pinning a version there (`php85: true`)
+  makes Rector rewrite code past the declared floor - that is how `array_any()`
+  (PHP 8.4+) landed in a project declaring `^8.3` and would have broken the CI
+  matrix, invisibly, because the dev machine ran a newer PHP.
 - `declare(strict_types=1)`, `final` classes, typed class constants
   (`public const string X = ...`). Static factory-style method casing is used in
-  places (`Locate`, `Sort`).
+  places (`Locate`, `Sort`, `From`, `ForManifest`).
 - PSR-4: `Mds\Workspace\` → `src/`. Classes in `Mds\Workspace` need no import from
   each other; classes in `Mds\Workspace\Command` must be imported when used from
   `Mds\Workspace`.
@@ -91,7 +102,7 @@ Run a single test: `vendor/bin/pest --filter="<description>"`.
   resolution or per-member plugin requirements to work around this.
 - **Recursion sentinel.** `MemberProcessRunner` sets `COMPOSER_WORKSPACE_CHILD=1`
   on every member subprocess; `WorkspacePlugin` skips propagation (and the
-  deprecation warning) when that env var is present. Both the `ws` command runner
+  outdated-key notice) when that env var is present. Both the `ws` command runner
   and the event propagator must use `MemberProcessRunner` so the sentinel is
   always set - otherwise auto-fanout recurses infinitely.
 - **Opt-in is strict.** No propagation unless `extra.workspace.propagate` enables
@@ -116,20 +127,21 @@ Run a single test: `vendor/bin/pest --filter="<description>"`.
   breaks auth on private repos). `VcsMirrors` derives a coarse key per declared
   `repositories` entry - including the `source` of an inline `package` entry,
   which `GitDownloader` clones through the same cache; `FanOut::launchable()`
-  refuses to launch a member whose keys overlap one in flight. Keys are deliberately coarser than Composer's own
-  cache paths - over-serialising costs parallelism, under-serialising corrupts
-  a cache. A member with `config.preferred-install: source` may clone anything,
+  refuses to launch a member whose keys overlap one in flight. Keys are
+  deliberately coarser than Composer's own cache paths - over-serialising costs
+  parallelism, under-serialising corrupts a cache. A member with `config.preferred-install: source` may clone anything,
   so it gets `VcsMirrors::ANY` and runs alone (it is never starved: the deck
   drains and the `$active === []` branch launches it). `--prefer-source` sets
   `FanOut`'s `$sharedMirror`, which serialises everything.
-
 - **`ws` options are not forwarded.** `--filter`, `--continue-on-error` and
   `--concurrency` belong to `ws`; `ArgumentForwarder` must strip every new one,
   or members get an option Composer rejects.
 
 ## Notes
 
-- Planning/design docs under `docs/` are git-ignored (process artifacts).
-- Open follow-ups (integration test of the real subprocess path, global-only DX
-  hint, CI exit-code handling) were tracked in `docs/superpowers/` - ask the user
-  for the current location if needed.
+- Planning/design docs under `docs/superpowers/` are git-ignored (process
+  artifacts), including the open follow-ups: an integration test of the real
+  subprocess path, a DX hint when the plugin is not installed globally, and CI
+  exit-code handling.
+- Git history was reset at `0.1.0`; the CHANGELOG starts there. Commit messages
+  are one line and never mention an assistant.

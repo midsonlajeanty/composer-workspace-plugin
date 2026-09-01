@@ -157,9 +157,9 @@ script back to sequential.
 the way git finds `.git`. Where that layout is not preserved (containers), pin
 it: `export COMPOSER_WORKSPACE_ROOT=/var/monorepo`.
 
-> **Upgrading from 1.x:** the globs moved. `extra.workspaces` and the older
-> `extra.packages` are gone - put them in `extra.workspace.members` instead.
-> The plugin says so on startup if it finds either.
+> **Coming from an older config?** A top-level `extra.workspaces` or
+> `extra.packages` is no longer read - move the globs to
+> `extra.workspace.members`. The plugin says so on startup if it finds either.
 
 ## How it works
 

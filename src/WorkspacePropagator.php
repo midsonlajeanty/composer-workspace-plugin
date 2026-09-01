@@ -44,6 +44,6 @@ final readonly class WorkspacePropagator
             VcsMirrors::SharedBy($forwarded),
         );
 
-        return (new ProxyHandler($action, $members, $forwarded, $fanOut))->handle($output);
+        return new ProxyHandler($action, $members, $forwarded, $fanOut)->handle($output);
     }
 }

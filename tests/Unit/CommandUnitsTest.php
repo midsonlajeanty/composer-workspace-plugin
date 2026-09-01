@@ -100,11 +100,11 @@ it('stops at the first failure unless continue-on-error is set', function (): vo
 
     $members = [workspace_test_member('acme/a'), workspace_test_member('acme/b')];
 
-    expect((new FanOut($runner, false))->execute(['update'], [$members], 'update', new BufferedOutput))->toBe(1);
+    expect(new FanOut($runner, false)->execute(['update'], [$members], 'update', new BufferedOutput))->toBe(1);
     expect($ran)->toBe(['acme/a']);
 
     $ran = [];
-    expect((new FanOut($runner, true))->execute(['update'], [$members], 'update', new BufferedOutput))->toBe(1);
+    expect(new FanOut($runner, true)->execute(['update'], [$members], 'update', new BufferedOutput))->toBe(1);
     expect($ran)->toBe(['acme/a', 'acme/b']);
 });
 
@@ -112,7 +112,7 @@ it('requires a script name for run', function (): void {
     $fanOut = new FanOut(static fn (): MemberRun => workspace_test_run(), false);
     $output = new BufferedOutput;
 
-    expect((new RunScriptHandler([workspace_test_member('acme/a')], [], $fanOut))->handle($output))->toBe(1);
+    expect(new RunScriptHandler([workspace_test_member('acme/a')], [], $fanOut)->handle($output))->toBe(1);
     expect($output->fetch())->toContain('Missing script name');
 });
 
@@ -129,7 +129,7 @@ it('only runs the script in members that declare it', function (): void {
         workspace_test_member('acme/b'),
     ];
 
-    expect((new RunScriptHandler($members, ['test'], $fanOut))->handle(new BufferedOutput))->toBe(0);
+    expect(new RunScriptHandler($members, ['test'], $fanOut)->handle(new BufferedOutput))->toBe(0);
     expect($ran)->toBe([[['run-script', 'test'], 'acme/a']]);
 });
 
@@ -177,7 +177,7 @@ it('proxies members in topological order, dependencies first', function (): void
         workspace_test_member('acme/library'),
     ];
 
-    expect((new ProxyHandler('update', $members, [], $fanOut))->handle(new BufferedOutput))->toBe(0);
+    expect(new ProxyHandler('update', $members, [], $fanOut)->handle(new BufferedOutput))->toBe(0);
     expect($ran)->toBe(['acme/library', 'acme/app']);
 });
 
@@ -196,7 +196,7 @@ it('fails without running any member when the dependency graph has a cycle', fun
 
     $output = new BufferedOutput;
 
-    expect((new ProxyHandler('update', $members, [], $fanOut))->handle($output))->toBe(1);
+    expect(new ProxyHandler('update', $members, [], $fanOut)->handle($output))->toBe(1);
     expect($ran)->toBe([]);
     expect($output->fetch())->toContain('Cyclic workspace dependency detected');
 });

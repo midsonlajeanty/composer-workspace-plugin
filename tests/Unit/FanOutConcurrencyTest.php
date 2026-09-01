@@ -68,7 +68,7 @@ it('runs every member of a layer at the same time', function (): void {
         workspace_test_member('acme/c'),
     ];
 
-    $exit = (new FanOut($runner, false, 4))->execute(['update'], [$layer], 'update', new BufferedOutput);
+    $exit = new FanOut($runner, false, 4)->execute(['update'], [$layer], 'update', new BufferedOutput);
 
     expect($exit)->toBe(0);
     expect($peak)->toBe(3);
@@ -89,7 +89,7 @@ it('never exceeds the concurrency limit', function (): void {
 
     $layer = array_map(workspace_test_member(...), ['acme/a', 'acme/b', 'acme/c', 'acme/d', 'acme/e']);
 
-    (new FanOut($runner, false, 2))->execute(['update'], [$layer], 'update', new BufferedOutput);
+    new FanOut($runner, false, 2)->execute(['update'], [$layer], 'update', new BufferedOutput);
 
     expect($peak)->toBe(2);
 });
@@ -110,7 +110,7 @@ it('does not start a layer before the previous one is done', function (): void {
         [workspace_test_member('acme/app')],
     ];
 
-    (new FanOut($runner, false, 4))->execute(['install'], $layers, 'install', new BufferedOutput);
+    new FanOut($runner, false, 4)->execute(['install'], $layers, 'install', new BufferedOutput);
 
     expect($events)->toBe(['start:acme/lib', 'end:acme/lib', 'start:acme/app', 'end:acme/app']);
 });
@@ -124,7 +124,7 @@ it('prints the buffered output of each member once it finishes', function (): vo
     );
 
     $output = new BufferedOutput;
-    (new FanOut($runner, false, 4))->execute(['update'], [[
+    new FanOut($runner, false, 4)->execute(['update'], [[
         workspace_test_member('acme/a'),
         workspace_test_member('acme/b'),
     ]], 'update', $output);
@@ -150,11 +150,11 @@ it('skips the remaining layers after a failure unless continue-on-error is set',
         [workspace_test_member('acme/app')],
     ];
 
-    expect((new FanOut($runner, false, 4))->execute(['install'], $layers, 'install', new BufferedOutput))->toBe(1);
+    expect(new FanOut($runner, false, 4)->execute(['install'], $layers, 'install', new BufferedOutput))->toBe(1);
     expect($started)->toBe(['acme/lib']);
 
     $started = [];
-    expect((new FanOut($runner, true, 4))->execute(['install'], $layers, 'install', new BufferedOutput))->toBe(1);
+    expect(new FanOut($runner, true, 4)->execute(['install'], $layers, 'install', new BufferedOutput))->toBe(1);
     expect($started)->toBe(['acme/lib', 'acme/app']);
 });
 
@@ -191,7 +191,7 @@ it('never runs two members that share a vcs mirror at the same time', function (
         workspace_test_member('acme/c'),
     ];
 
-    expect((new FanOut($runner, false, 4))->execute(['update'], [$layer], 'update', new BufferedOutput))
+    expect(new FanOut($runner, false, 4)->execute(['update'], [$layer], 'update', new BufferedOutput))
         ->toBe(0);
 
     expect($mirrorPeak)->toBe(1);
@@ -216,7 +216,7 @@ it('runs members with different vcs mirrors side by side', function (): void {
         workspace_test_member('acme/b', vcsMirrors: ['github.com/acme/two']),
     ];
 
-    (new FanOut($runner, false, 4))->execute(['update'], [$layer], 'update', new BufferedOutput);
+    new FanOut($runner, false, 4)->execute(['update'], [$layer], 'update', new BufferedOutput);
 
     expect($peak)->toBe(2);
 });
@@ -236,7 +236,7 @@ it('serialises the whole layer when every member shares the mirror cache', funct
 
     $layer = array_map(workspace_test_member(...), ['acme/a', 'acme/b', 'acme/c']);
 
-    (new FanOut($runner, false, 4, sharedMirror: true))
+    new FanOut($runner, false, 4, sharedMirror: true)
         ->execute(['update'], [$layer], 'update', new BufferedOutput);
 
     expect($peak)->toBe(1);
@@ -269,7 +269,7 @@ it('never runs a member that touches every mirror alongside another', function (
         workspace_test_member('acme/c'),
     ];
 
-    expect((new FanOut($runner, false, 4))->execute(['update'], [$layer], 'update', new BufferedOutput))
+    expect(new FanOut($runner, false, 4)->execute(['update'], [$layer], 'update', new BufferedOutput))
         ->toBe(0);
 
     expect($wildcardRan)->toBeTrue();
@@ -291,7 +291,7 @@ it('still runs a member that touches every mirror when it is queued last', funct
         workspace_test_member('acme/z', vcsMirrors: [VcsMirrors::ANY]),
     ];
 
-    (new FanOut($runner, false, 4))->execute(['update'], [$layer], 'update', new BufferedOutput);
+    new FanOut($runner, false, 4)->execute(['update'], [$layer], 'update', new BufferedOutput);
 
     expect($ran)->toBe(['acme/a', 'acme/b', 'acme/z']);
 });

@@ -29,7 +29,7 @@ it('fans the action out to members in topological order with forwarded flags', f
         return workspace_test_run();
     };
 
-    $exit = (new WorkspacePropagator($runner))->propagate(
+    $exit = new WorkspacePropagator($runner)->propagate(
         $root,
         ['./packages'],
         'install',

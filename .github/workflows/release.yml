@@ -1,127 +1,33 @@
 name: Release
 
 on:
-    push:
-        tags:
-            - "v[0-9]+.[0-9]+.[0-9]+"
-            - "[0-9]+.[0-9]+.[0-9]+"
-            - "v[0-9]+.[0-9]+.[0-9]+-*"
-            - "[0-9]+.[0-9]+.[0-9]+-*"
+  workflow_call:
+    inputs:
+      tag:
+        description: Tag release-please just created.
+        required: true
+        type: string
 
 permissions:
-    contents: write
+  contents: read
 
 jobs:
-    release:
-        runs-on: ubuntu-latest
-
-        steps:
-            - name: Checkout
-              uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-              with:
-                  fetch-depth: 0
-
-            - name: Setup PHP
-              uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # 2.37.2
-              with:
-                  php-version: "8.4"
-                  coverage: none
-
-            - name: Install dependencies
-              run: composer install --prefer-dist --no-progress --no-interaction
-
-            - name: Run tests
-              run: composer test
-
-            - name: Resolve changelog range
-              id: range
-              run: |
-                  # Find the previous tag; fall back to the first commit on the
-                  # very first release (no prior tag / no GitHub release exists yet).
-                  CURRENT_TAG="${GITHUB_REF_NAME}"
-                  BASE_REF=$(git describe --tags --abbrev=0 "${CURRENT_TAG}^" 2>/dev/null || true)
-                  if [ -z "$BASE_REF" ]; then
-                      BASE_REF=$(git rev-list --max-parents=0 HEAD | tail -n 1)
-                  fi
-                  echo "base=$BASE_REF" >> "$GITHUB_OUTPUT"
-                  echo "head=$CURRENT_TAG" >> "$GITHUB_OUTPUT"
-
-            - name: Generate Changelog
-              id: changelog
-              uses: metcalfc/changelog-generator@98b12822c5dc6bad335d1d60d920cb69831b9c5d # v4.8.0
-              with:
-                  myToken: ${{ secrets.GITHUB_TOKEN }}
-                  base-ref: ${{ steps.range.outputs.base }}
-                  head-ref: ${{ steps.range.outputs.head }}
-
-            - name: Update CHANGELOG.md
-              env:
-                  NOTES: ${{ steps.changelog.outputs.changelog }}
-              run: |
-                  # Use environment variable to avoid shell injection
-                  VERSION="${GITHUB_REF_NAME}"
-                  DATE=$(date +%Y-%m-%d)
-
-                  if [ ! -f CHANGELOG.md ]; then
-                    echo "# Changelog" > CHANGELOG.md
-                    echo "" >> CHANGELOG.md
-                    echo "All notable changes to this project will be documented in this file." >> CHANGELOG.md
-                    echo "" >> CHANGELOG.md
-                    echo "## [Unreleased]" >> CHANGELOG.md
-                    echo "" >> CHANGELOG.md
-                  fi
-
-                  TEMP_FILE=$(mktemp)
-                  echo "## [$VERSION] - $DATE" > "$TEMP_FILE"
-                  echo "" >> "$TEMP_FILE"
-                  # Use printf or heredoc to safely handle the environment variable
-                  printf "%s\n" "$NOTES" >> "$TEMP_FILE"
-                  echo "" >> "$TEMP_FILE"
-
-                  if grep -q "## \\[Unreleased\\]" CHANGELOG.md; then
-                      # Insert after Unreleased
-                      sed -i "/## \\[Unreleased\\]/r $TEMP_FILE" CHANGELOG.md
-                      # Add a newline if needed
-                      sed -i "/## \\[Unreleased\\]/a \\\\" CHANGELOG.md
-                  else
-                      # Insert after header
-                      sed -i "4r $TEMP_FILE" CHANGELOG.md
-                  fi
-
-            - name: Commit CHANGELOG.md
-              uses: stefanzweifel/git-auto-commit-action@4a55954c782fc1ea30b9056cd3e7a2b40ca8887d # v7.2.0
-              with:
-                  commit_message: "docs: update CHANGELOG.md for ${{ github.ref_name }}"
-                  file_pattern: 'CHANGELOG.md'
-                  branch: main
-
-            - name: Create GitHub release
-              env:
-                  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-              run: |
-                  version="${GITHUB_REF_NAME#v}"
-                  constraint="^${version}"
-                  flags=(--generate-notes)
-
-                  if [[ "$GITHUB_REF_NAME" == *-* ]]; then
-                      flags+=(--prerelease)
-                      constraint="${version}"
-                  fi
-
-                  cat > "$RUNNER_TEMP/release-body.md" <<EOF
-                  **Bun-style monorepo workspaces for Composer** - auto-registered path repositories and fan-out commands across every member.
-
-                  ## Installation
-
-                  \`\`\`bash
-                  composer global require midsonlajeanty/composer-workspace-plugin:"${constraint}"
-                  composer global config allow-plugins.midsonlajeanty/composer-workspace-plugin true
-                  \`\`\`
-
-                  See the [README](https://github.com/midsonlajeanty/composer-workspace-plugin#readme) for workspace setup and fan-out commands.
-                  EOF
-
-                  gh release create "$GITHUB_REF_NAME" \
-                      --title "$GITHUB_REF_NAME" \
-                      --notes-file "$RUNNER_TEMP/release-body.md" \
-                      "${flags[@]}"
+  notes:
+    name: Installation notes
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Append the install command to the release notes
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ inputs.tag }}
+        run: |
+          body=$(gh release view "$TAG" --repo "$GITHUB_REPOSITORY" --json body --jq .body)
+          {
+            printf '%s\n\n## Installation\n\n```bash\n' "$body"
+            printf 'composer global require midsonlajeanty/composer-workspace-plugin:"^%s"\n' "${TAG#v}"
+            printf '%s\n' 'composer global config allow-plugins.midsonlajeanty/composer-workspace-plugin true'
+            printf '```\n'
+          } > "$RUNNER_TEMP/notes.md"
+          gh release edit "$TAG" --repo "$GITHUB_REPOSITORY" --notes-file "$RUNNER_TEMP/notes.md"

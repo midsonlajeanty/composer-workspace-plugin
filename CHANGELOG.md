@@ -6,8 +6,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 While the plugin is on `0.x`, every minor release may change behaviour without notice.
 
-## [Unreleased]
-
 ## [v0.1.0] - 2026-09-01
 
 - [037fc54](http://github.com/midsonlajeanty/composer-workspace-plugin/commit/037fc544c1b420a445169b531423a5a1ed47bcb6) - style: apply the php 8.4 new-without-parentheses rewrite
